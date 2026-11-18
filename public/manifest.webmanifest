@@ -1,0 +1,10 @@
+{
+  "name": "Acolhimento Conectado",
+  "short_name": "Acolhimento",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbfaf8",
+  "theme_color": "#1f7a6c",
+  "lang": "pt-BR",
+  "icons": [{ "src": "/icone.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
