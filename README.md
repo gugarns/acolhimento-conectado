@@ -38,7 +38,7 @@ Requisitos: Node 20+ e PostgreSQL 14+.
 cp .env.example .env.local     # ajuste DATABASE_URL
 npm install
 npm run db:migrate
-npm run db:curador -- seu-email@exemplo.org   # cria o primeiro curador
+npm run db:curador -- seu-email@exemplo.org   # cria o primeiro curador (ou use CURADORES_INICIAIS)
 npm run dev                                   # http://localhost:3000
 ```
 
@@ -50,14 +50,17 @@ Testes (usam o banco `acolhe_test`, que é apagado a cada execução):
 TEST_DATABASE_URL=postgres://usuario:senha@localhost:5432/acolhe_test npm test
 ```
 
-## Publicar (sugestão)
+## Publicar (Vercel + Supabase + Resend, sem terminal)
 
-1. **Banco:** criar um projeto no Supabase na região São Paulo e usar a connection string do pooler em `DATABASE_URL`.
-   Rodar `npm run db:migrate` apontando para ele.
-2. **App:** importar o repositório na Vercel e definir `DATABASE_URL`, `APP_URL`, `RESEND_API_KEY`,
-   `EMAIL_REMETENTE` e `CRON_SECRET`. O `vercel.json` agenda `/api/cron` todo dia às 8h (horário de Maceió).
-3. **E-mail:** verificar o domínio de envio no Resend.
-4. **Curadoria:** `npm run db:curador -- pessoa@mpal.mp.br` para cada pessoa do MPE/AL.
+1. **Supabase:** criar projeto na região *South America (São Paulo)*. Em *Connect*, copiar a string do
+   *Transaction pooler* (porta 6543) e trocar `[YOUR-PASSWORD]` pela senha do banco.
+2. **Resend:** criar conta e uma *API key*. Até verificar um domínio próprio, use o remetente
+   `Acolhimento Conectado <onboarding@resend.dev>` (o Resend só entrega para o e-mail dono da conta nesse modo).
+3. **Vercel:** *Add New → Project*, importar o repositório e, em *Environment Variables*, definir:
+   `DATABASE_URL`, `RESEND_API_KEY`, `EMAIL_REMETENTE`, `CRON_SECRET` (qualquer texto longo),
+   `CURADORES_INICIAIS` (e-mails do MPE/AL separados por vírgula) e `APP_URL` (o endereço `https://….vercel.app`).
+4. Cada deploy aplica as migrações e garante os curadores automaticamente (`npm run build`).
+   O `vercel.json` agenda `/api/cron` todo dia às 8h (horário de Maceió).
 
 ## Estrutura
 

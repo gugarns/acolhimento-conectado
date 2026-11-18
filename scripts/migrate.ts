@@ -5,7 +5,8 @@ import postgres from "postgres";
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL não definida");
 
-const sql = postgres(url, { max: 1, onnotice: () => {} });
+const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
+const sql = postgres(url, { max: 1, onnotice: () => {}, ssl: local ? false : "require", prepare: false });
 const dir = join(process.cwd(), "db", "migrations");
 
 async function main() {
@@ -19,6 +20,16 @@ async function main() {
     });
     console.log(`aplicada: ${arquivo}`);
   }
+  // CURADORES_INICIAIS="a@mpal.mp.br,b@mpal.mp.br" marca essas pessoas como curadoras (sem precisar de terminal).
+  const curadores = (process.env.CURADORES_INICIAIS ?? "")
+    .split(/[,;\s]+/)
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  for (const email of curadores) {
+    await sql`insert into usuario (email, is_curador) values (${email}, true)
+              on conflict (email) do update set is_curador = true`;
+  }
+  if (curadores.length) console.log(`curadores garantidos: ${curadores.length}`);
   await sql.end();
 }
 
